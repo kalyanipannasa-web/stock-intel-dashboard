@@ -1,0 +1,198 @@
+/* === Reset & base === */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  background: #f5f7fa;
+  color: #1a202c;
+  line-height: 1.5;
+  min-height: 100vh;
+}
+
+.hidden { display: none !important; }
+
+/* === Header === */
+header {
+  background: linear-gradient(135deg, #1e3a8a 0%, #3730a3 100%);
+  color: white;
+  padding: 1.5rem 2rem;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+header h1 { font-size: 1.6rem; font-weight: 700; }
+.subtitle { font-size: 0.85rem; opacity: 0.85; margin-top: 0.25rem; }
+
+/* === Layout === */
+.container {
+  display: grid;
+  grid-template-columns: 260px 1fr;
+  gap: 1.5rem;
+  max-width: 1400px;
+  margin: 1.5rem auto;
+  padding: 0 1.5rem;
+}
+
+/* === Sidebar === */
+.sidebar {
+  background: white;
+  border-radius: 12px;
+  padding: 1.25rem;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+  height: fit-content;
+  position: sticky;
+  top: 1.5rem;
+}
+
+.sidebar h2 {
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: #64748b;
+  margin-bottom: 0.75rem;
+}
+
+#company-list { list-style: none; }
+
+#company-list li {
+  padding: 0.65rem 0.85rem;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background 0.15s;
+  font-size: 0.9rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+#company-list li:hover { background: #f1f5f9; }
+#company-list li.active { background: #1e3a8a; color: white; }
+#company-list li.active .li-sector { color: rgba(255,255,255,0.7); }
+
+.li-symbol { font-weight: 600; }
+.li-sector { font-size: 0.7rem; color: #94a3b8; }
+
+#company-list li.loading { color: #94a3b8; cursor: default; font-style: italic; }
+#company-list li.loading:hover { background: transparent; }
+
+/* === Content === */
+.content {
+  background: white;
+  border-radius: 12px;
+  padding: 1.75rem;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+  min-height: 600px;
+}
+
+.placeholder {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 400px;
+  color: #94a3b8;
+  font-size: 1.1rem;
+}
+
+.stock-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  padding-bottom: 1.25rem;
+  border-bottom: 1px solid #e2e8f0;
+  margin-bottom: 1.25rem;
+}
+
+.stock-header h2 { font-size: 1.5rem; font-weight: 700; }
+
+.sector-badge {
+  display: inline-block;
+  margin-top: 0.4rem;
+  padding: 0.2rem 0.65rem;
+  background: #eef2ff;
+  color: #3730a3;
+  font-size: 0.75rem;
+  border-radius: 999px;
+  font-weight: 500;
+}
+
+.price-block { text-align: right; }
+.price { font-size: 1.75rem; font-weight: 700; }
+.return { font-size: 0.95rem; margin-top: 0.25rem; font-weight: 600; }
+.return.positive { color: #16a34a; }
+.return.negative { color: #dc2626; }
+
+/* === Range selector === */
+.range-selector {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.range-btn {
+  padding: 0.45rem 0.95rem;
+  border: 1px solid #e2e8f0;
+  background: white;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: #475569;
+  transition: all 0.15s;
+}
+
+.range-btn:hover { background: #f8fafc; }
+.range-btn.active {
+  background: #1e3a8a;
+  color: white;
+  border-color: #1e3a8a;
+}
+
+/* === Chart === */
+.chart-container {
+  position: relative;
+  height: 360px;
+  margin-bottom: 1.5rem;
+}
+
+/* === Stat cards === */
+.stat-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 0.75rem;
+}
+
+.stat-card {
+  background: #f8fafc;
+  padding: 0.95rem;
+  border-radius: 8px;
+  border: 1px solid #e2e8f0;
+}
+
+.stat-label {
+  font-size: 0.7rem;
+  color: #64748b;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 0.35rem;
+}
+
+.stat-value { font-size: 1.05rem; font-weight: 700; color: #1a202c; }
+
+/* === Footer === */
+footer {
+  text-align: center;
+  padding: 1.5rem;
+  color: #94a3b8;
+  font-size: 0.8rem;
+}
+
+/* === Responsive === */
+@media (max-width: 768px) {
+  .container { grid-template-columns: 1fr; }
+  .sidebar { position: static; }
+  .stock-header { flex-direction: column; gap: 1rem; }
+  .price-block { text-align: left; }
+}

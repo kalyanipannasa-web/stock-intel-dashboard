@@ -1,0 +1,42 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+.Python
+
+# Virtual environment
+venv/
+env/
+ENV/
+
+# Database — recreatable via seed_data.py
+data/*.db
+data/*.sqlite
+
+# IDE
+.vscode/
+.idea/
+*.swp
+
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Environment variables (if added later)
+.env
+
+# Distribution / packaging
+build/
+dist/
+*.egg
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Logs
+*.log
+
+# Screenshots — keep these (remove the line if you want them ignored)
+# screenshots/

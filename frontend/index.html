@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Stock Intel Dashboard</title>
+  <link rel="stylesheet" href="style.css">
+
+  <!-- Chart.js from CDN — no install needed -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+</head>
+<body>
+
+  <header>
+    <h1>📊 Stock Intel Dashboard</h1>
+    <p class="subtitle">Real-time analytics for Indian large-cap stocks</p>
+  </header>
+
+  <div class="container">
+
+    <!-- LEFT PANEL — Company list -->
+    <aside class="sidebar">
+      <h2>Companies</h2>
+      <ul id="company-list">
+        <li class="loading">Loading...</li>
+      </ul>
+    </aside>
+
+    <!-- RIGHT PANEL — Selected stock detail -->
+    <main class="content">
+      <div id="placeholder" class="placeholder">
+        <p>👈 Select a company to view its data</p>
+      </div>
+
+      <div id="stock-detail" class="hidden">
+
+        <!-- Header: name + sector + current price -->
+        <div class="stock-header">
+          <div>
+            <h2 id="stock-name"></h2>
+            <span id="stock-sector" class="sector-badge"></span>
+          </div>
+          <div class="price-block">
+            <div id="latest-price" class="price"></div>
+            <div id="latest-return" class="return"></div>
+          </div>
+        </div>
+
+        <!-- Time range selector -->
+        <div class="range-selector">
+          <button data-days="30" class="range-btn active">30D</button>
+          <button data-days="90" class="range-btn">90D</button>
+          <button data-days="365" class="range-btn">1Y</button>
+          <button data-days="730" class="range-btn">2Y</button>
+        </div>
+
+        <!-- Chart -->
+        <div class="chart-container">
+          <canvas id="price-chart"></canvas>
+        </div>
+
+        <!-- Summary stat cards -->
+        <div class="stat-cards">
+          <div class="stat-card">
+            <div class="stat-label">52-Week High</div>
+            <div class="stat-value" id="stat-high"></div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">52-Week Low</div>
+            <div class="stat-value" id="stat-low"></div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">52-Week Avg</div>
+            <div class="stat-value" id="stat-avg"></div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">Volatility (30d ann.)</div>
+            <div class="stat-value" id="stat-vol"></div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">% From 52w High</div>
+            <div class="stat-value" id="stat-distance"></div>
+          </div>
+        </div>
+
+      </div>
+    </main>
+  </div>
+
+  <footer>
+    <p>JarNox Internship Assignment · Built with FastAPI + Chart.js · Data from Yahoo Finance</p>
+  </footer>
+
+  <script src="app.js"></script>
+</body>
+</html>
