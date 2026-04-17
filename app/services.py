@@ -129,3 +129,104 @@ def compare_stocks(db: Session, symbol1: str, symbol2: str, days: int = 90) -> O
         "volatility_2_pct": data2[-1].volatility_30d,
         "winner": symbol1 if return_1_pct > return_2_pct else symbol2,
     }
+
+
+# ──────────────────────────────────────────────────────────────
+# Phase 8 — ML PREDICTION (linear regression)
+# ──────────────────────────────────────────────────────────────
+
+from sklearn.linear_model import LinearRegression
+from datetime import timedelta
+
+
+def predict_next_n_days(
+    db: Session,
+    symbol: str,
+    lookback_days: int = 60,
+    predict_days: int = 7,
+) -> Optional[dict]:
+    """
+    Predict next N days of closing prices using linear regression.
+
+    Method:
+    - Fit y = mx + b on the last `lookback_days` of close prices
+      (where x = day index 0..N-1)
+    - Extrapolate the line forward by `predict_days` steps
+    - Skip weekends in the predicted dates (rough approximation;
+      doesn't account for Indian holidays)
+
+    Returns:
+        {
+            "symbol": str,
+            "lookback_days": int,
+            "predict_days": int,
+            "model": "LinearRegression",
+            "r_squared": float,           # how well the line fit historical data
+            "trend": "up" | "down" | "flat",
+            "history": [{date, close}],   # the data the model was trained on
+            "predictions": [{date, predicted_close}],
+            "disclaimer": str
+        }
+    """
+    company = get_company_by_symbol(db, symbol)
+    if not company:
+        return None
+
+    rows = get_recent_stock_data(db, symbol, days=lookback_days)
+    if len(rows) < 10:
+        return None  # not enough history
+
+    # Build training data
+    X = np.array(range(len(rows))).reshape(-1, 1)
+    y = np.array([r.close for r in rows])
+
+    # Train the model
+    model = LinearRegression()
+    model.fit(X, y)
+
+    r_squared = float(model.score(X, y))
+    slope = float(model.coef_[0])
+
+    # Predict next N business days
+    future_X = np.array(range(len(rows), len(rows) + predict_days)).reshape(-1, 1)
+    future_y = model.predict(future_X)
+
+    # Generate the dates for predictions (skipping weekends)
+    last_date = rows[-1].date
+    future_dates = []
+    current = last_date
+    while len(future_dates) < predict_days:
+        current = current + timedelta(days=1)
+        if current.weekday() < 5:  # Monday = 0, Friday = 4
+            future_dates.append(current)
+
+    # Determine trend
+    if slope > 0.5:
+        trend = "up"
+    elif slope < -0.5:
+        trend = "down"
+    else:
+        trend = "flat"
+
+    return {
+        "symbol": symbol,
+        "lookback_days": len(rows),
+        "predict_days": predict_days,
+        "model": "LinearRegression",
+        "r_squared": round(r_squared, 4),
+        "trend": trend,
+        "history": [
+            {"date": r.date.isoformat(), "close": float(r.close)}
+            for r in rows
+        ],
+        "predictions": [
+            {"date": d.isoformat(), "predicted_close": round(float(p), 2)}
+            for d, p in zip(future_dates, future_y)
+        ],
+        "disclaimer": (
+            "Linear regression on 60 days of close prices. Educational only — "
+            "not suitable for actual trading decisions. Real markets are "
+            "non-linear and influenced by news, earnings, and macro events "
+            "that this model ignores."
+        ),
+    }

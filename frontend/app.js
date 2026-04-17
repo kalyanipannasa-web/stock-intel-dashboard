@@ -61,20 +61,42 @@ async function selectCompany(symbol) {
 // === Load chart data ===
 async function loadStockData() {
   try {
-    const url = `${API_BASE}/data/${currentSymbol}?days=${currentDays}`;
-    const result = await fetchJSON(url);
+    const dataUrl = `${API_BASE}/data/${currentSymbol}?days=${currentDays}`;
+    const predictUrl = `${API_BASE}/predict/${currentSymbol}?lookback=60&days=7`;
+
+    // Fetch both in parallel
+    const [result, prediction] = await Promise.all([
+      fetchJSON(dataUrl),
+      fetchJSON(predictUrl).catch(() => null),  // prediction failure shouldn't break chart
+    ]);
 
     const labels = result.data.map(d => d.date);
     const closes = result.data.map(d => d.close);
     const ma7 = result.data.map(d => d.ma_7);
 
-    renderChart(labels, closes, ma7);
+    // Append prediction data points to the same chart
+    let predLabels = [];
+    let predValues = [];
+    if (prediction && prediction.predictions) {
+      predLabels = prediction.predictions.map(p => p.date);
+      // For prediction overlay: nulls during history, then values during prediction
+      // Last historical close acts as the "bridge" point
+      const bridge = closes[closes.length - 1];
+      predValues = [
+        ...new Array(closes.length - 1).fill(null),
+        bridge,
+        ...prediction.predictions.map(p => p.predicted_close),
+      ];
+    }
+
+    const allLabels = [...labels, ...predLabels];
+
+    renderChart(allLabels, closes, ma7, predValues);
 
     // Header info
     document.getElementById("stock-name").textContent = result.name;
     document.getElementById("stock-sector").textContent = result.sector;
 
-    // Latest price + today's return
     const latest = result.data[result.data.length - 1];
     document.getElementById("latest-price").textContent = fmt.inr(latest.close);
 
@@ -85,7 +107,6 @@ async function loadStockData() {
     console.error("Failed to load data:", err);
   }
 }
-
 // === Load summary stats ===
 async function loadSummary() {
   try {
@@ -104,40 +125,60 @@ async function loadSummary() {
 }
 
 // === Render Chart.js line chart ===
-function renderChart(labels, closes, ma7) {
+function renderChart(labels, closes, ma7, predValues) {
   const ctx = document.getElementById("price-chart").getContext("2d");
 
-  // Destroy previous chart instance to prevent memory leaks
   if (chartInstance) chartInstance.destroy();
+
+  // Pad close and MA arrays with nulls so they align with the longer label array
+  const paddedCloses = [...closes, ...new Array(labels.length - closes.length).fill(null)];
+  const paddedMa7 = [...ma7, ...new Array(labels.length - ma7.length).fill(null)];
+
+  const datasets = [
+    {
+      label: "Close Price (₹)",
+      data: paddedCloses,
+      borderColor: "#1e3a8a",
+      backgroundColor: "rgba(30, 58, 138, 0.08)",
+      borderWidth: 2,
+      fill: true,
+      tension: 0.25,
+      pointRadius: 0,
+      pointHoverRadius: 5,
+      spanGaps: false,
+    },
+    {
+      label: "7-day Moving Avg",
+      data: paddedMa7,
+      borderColor: "#f59e0b",
+      borderWidth: 1.5,
+      borderDash: [5, 5],
+      fill: false,
+      tension: 0.25,
+      pointRadius: 0,
+      spanGaps: false,
+    }
+  ];
+
+  // Add prediction line if available
+  if (predValues && predValues.length > 0) {
+    datasets.push({
+      label: "🔮 Predicted (next 7 days)",
+      data: predValues,
+      borderColor: "#dc2626",
+      borderWidth: 2,
+      borderDash: [8, 4],
+      fill: false,
+      tension: 0,
+      pointRadius: 3,
+      pointBackgroundColor: "#dc2626",
+      spanGaps: false,
+    });
+  }
 
   chartInstance = new Chart(ctx, {
     type: "line",
-    data: {
-      labels: labels,
-      datasets: [
-        {
-          label: "Close Price (₹)",
-          data: closes,
-          borderColor: "#1e3a8a",
-          backgroundColor: "rgba(30, 58, 138, 0.08)",
-          borderWidth: 2,
-          fill: true,
-          tension: 0.25,
-          pointRadius: 0,
-          pointHoverRadius: 5,
-        },
-        {
-          label: "7-day Moving Avg",
-          data: ma7,
-          borderColor: "#f59e0b",
-          borderWidth: 1.5,
-          borderDash: [5, 5],
-          fill: false,
-          tension: 0.25,
-          pointRadius: 0,
-        }
-      ]
-    },
+    data: { labels, datasets },
     options: {
       responsive: true,
       maintainAspectRatio: false,
@@ -163,7 +204,6 @@ function renderChart(labels, closes, ma7) {
     }
   });
 }
-
 // === Time range buttons ===
 document.querySelectorAll(".range-btn").forEach(btn => {
   btn.addEventListener("click", () => {

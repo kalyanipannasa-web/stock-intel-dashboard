@@ -127,3 +127,29 @@ def compare(
             detail=f"One or both symbols not found: '{symbol1}', '{symbol2}'"
         )
     return result
+# ─────────────────────────────────────────────────────────────
+# Predict (BONUS — ML)
+# ─────────────────────────────────────────────────────────────
+
+@app.get("/predict/{symbol}", response_model=schemas.PredictionResponse, tags=["Predict"])
+def predict(
+    symbol: str,
+    lookback: int = Query(60, ge=10, le=252, description="Days of history to train on"),
+    days: int = Query(7, ge=1, le=30, description="Days to predict forward"),
+    db: Session = Depends(get_db),
+):
+    """
+    Predict the next N closing prices using simple linear regression.
+
+    **Educational only — not for actual trading.** Linear regression on price data
+    captures the trend but ignores news, earnings, and market microstructure.
+    """
+    result = services.predict_next_n_days(
+        db, symbol, lookback_days=lookback, predict_days=days
+    )
+    if result is None:
+        raise HTTPException(
+            status_code=404,
+            detail=f"Symbol '{symbol}' not found or insufficient history"
+        )
+    return result

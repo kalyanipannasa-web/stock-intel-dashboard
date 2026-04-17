@@ -72,3 +72,28 @@ class ComparisonResponse(BaseModel):
     volatility_1_pct: Optional[float]
     volatility_2_pct: Optional[float]
     winner: str = Field(..., description="Symbol with higher % return")
+
+    # ──────────────────────────────────────────────────────────────
+# Phase 8 — ML PREDICTION schemas
+# ──────────────────────────────────────────────────────────────
+
+class HistoryPoint(BaseModel):
+    date: str
+    close: float
+
+
+class PredictionPoint(BaseModel):
+    date: str
+    predicted_close: float
+
+
+class PredictionResponse(BaseModel):
+    symbol: str
+    lookback_days: int
+    predict_days: int
+    model: str
+    r_squared: float = Field(..., description="Coefficient of determination, 0 to 1")
+    trend: str = Field(..., description="'up', 'down', or 'flat'")
+    history: list[HistoryPoint]
+    predictions: list[PredictionPoint]
+    disclaimer: str

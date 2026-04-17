@@ -240,3 +240,5 @@ Built for the JarNox Software Engineering Internship Assignment, April 2026.
 - Stock data: [Yahoo Finance](https://finance.yahoo.com/) via the [yfinance](https://github.com/ranaroussi/yfinance) Python library
 - Charting: [Chart.js](https://www.chartjs.org/)
 - API framework: [FastAPI](https://fastapi.tiangolo.com/)
+
+- **ML price prediction** (Phase 8 bonus): linear regression on the last 60 days of closes, projected 7 days forward — visualized as a red dashed line on the chart
